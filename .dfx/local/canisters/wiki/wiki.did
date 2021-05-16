@@ -1,0 +1,46 @@
+type Trie = 
+ variant {
+   branch: Branch;
+   "empty";
+   leaf: Leaf;
+ };
+type List = 
+ opt record {
+       record {
+         Key;
+         Blog;
+       };
+       List;
+     };
+type Leaf = 
+ record {
+   keyvals: AssocList;
+   size: nat;
+ };
+type Key = 
+ record {
+   hash: Hash;
+   key: BlogId;
+ };
+type Hash = nat32;
+type Branch = 
+ record {
+   left: Trie;
+   right: Trie;
+   size: nat;
+ };
+type BlogId = nat32;
+type Blog = 
+ record {
+   body: text;
+   title: text;
+ };
+type AssocList_2 = List;
+type AssocList = AssocList_2;
+service : {
+  create: (BlogId, Blog) -> (BlogId);
+  delete: (BlogId) -> (bool);
+  read: (BlogId) -> (opt Blog) query;
+  readAll: () -> (Trie) query;
+  update: (BlogId, Blog) -> (bool);
+}
