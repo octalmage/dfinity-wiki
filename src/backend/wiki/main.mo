@@ -16,11 +16,9 @@ actor {
 
    // Create a blog post.
   public func create(blogId : BlogId, blog : Blog) : async BlogId {
-
     let result = Trie.find(blogs, key(blogId), eq);
     let notExists = Option.isNull(result);
     if (notExists) {
-
       blogs := Trie.replace(
         blogs,
         key(blogId),
@@ -41,7 +39,7 @@ actor {
     return blogs;
   };
 
-public func update(blogId : BlogId, blog : Blog) : async Bool {
+  public func update(blogId : BlogId, blog : Blog) : async Bool {
     let result = Trie.find(blogs, key(blogId), eq);
     let exists = Option.isSome(result);
     if (exists) {
@@ -54,7 +52,6 @@ public func update(blogId : BlogId, blog : Blog) : async Bool {
     };
     return exists;
   };
-
 
   public func delete(blogId : BlogId) : async Bool {
     let result = Trie.find(blogs, key(blogId), eq);
@@ -70,7 +67,11 @@ public func update(blogId : BlogId, blog : Blog) : async Bool {
     return exists;
   };
 
-   private func eq(x : BlogId, y : BlogId) : Bool {
+  public shared (msg) func whoami() : async Principal {
+    msg.caller
+  };
+
+  private func eq(x : BlogId, y : BlogId) : Bool {
     return x == y;
   };
 

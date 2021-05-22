@@ -13,6 +13,8 @@
   },
   "dependencies": {
     "@dfinity/agent": "0.8.6",
-    "@dfinity/authentication": "0.8.6"
+    "@dfinity/authentication": "0.8.6",
+    "rollup-plugin-node-builtins": "^2.1.2",
+    "rollup-plugin-polyfill-node": "^0.6.2"
   }
 }

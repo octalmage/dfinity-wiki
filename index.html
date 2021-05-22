@@ -47,16 +47,16 @@ CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE." />
 <link id="faviconLink" rel="shortcut icon" href="favicon.ico">
-<title>Internet Computer Wiki — </title>
+<title>Internet Computer Wiki — This wiki is cleared every hour.</title>
 <!--~~ This is a Tiddlywiki file. The points of interest in the file are marked with this pattern ~~-->
 
 <!--~~ Raw markup ~~-->
-
 <script type="module" src="/src/main.js"></script>
 <script>
 var global = global || window;
-var Buffer = Buffer || [];
 </script>
+
+
 
 </head>
 <body class="tc-body">
@@ -147,6 +147,8 @@ Error message and password prompt
 
 <li>$:/config/AutoSave</li>
 
+<li>$:/config/DefaultSidebarTab</li>
+
 <li>$:/config/Navigation/openLinkFromInsideRiver</li>
 
 <li>$:/config/Navigation/openLinkFromOutsideRiver</li>
@@ -157,7 +159,11 @@ Error message and password prompt
 
 <li>$:/config/PageControlButtons/Visibility/$:/core/ui/Buttons/new-image</li>
 
+<li>$:/config/TextEditor/EnableToolbar</li>
+
 <li>$:/config/TiddlerInfo/Mode</li>
+
+<li>$:/config/Toolbar/ButtonClass</li>
 
 <li>$:/core</li>
 
@@ -178,6 +184,10 @@ Error message and password prompt
 <li>$:/state/plugin-info-19779038-IC Sync Adapter--316598673</li>
 
 <li>$:/state/plugin-info-334910430-$:/core---1812962263</li>
+
+<li>$:/state/ShowPaletteEditor</li>
+
+<li>$:/state/sidebar</li>
 
 <li>$:/state/tab--1963855381</li>
 
@@ -201,6 +211,10 @@ Error message and password prompt
 
 <li>$:/themes/tiddlywiki/vanilla</li>
 
+<li>$:/themes/tiddlywiki/vanilla/options/sidebarlayout</li>
+
+<li>$:/themes/tiddlywiki/vanilla/options/stickytitles</li>
+
 <li>$:/view</li>
 
 <li>Home</li>
@@ -222,6 +236,9 @@ Error message and password prompt
 <div created="20210516151937389" modified="20210516153403006" title="$:/config/AutoSave">
 <pre>yes</pre>
 </div>
+<div created="20210522171721188" modified="20210522171721188" title="$:/config/DefaultSidebarTab">
+<pre>$:/core/ui/SideBar/Recent</pre>
+</div>
 <div created="20210516182144526" modified="20210516182146814" title="$:/config/Navigation/openLinkFromInsideRiver">
 <pre>bottom</pre>
 </div>
@@ -237,8 +254,14 @@ Error message and password prompt
 <div created="20210101000000000" id="1621189174" modified="20210516184105604" title="$:/config/PageControlButtons/Visibility/$:/core/ui/Buttons/new-image" type="text/vnd.tiddlywiki">
 <pre>hide</pre>
 </div>
+<div created="20210522171723633" modified="20210522171725631" title="$:/config/TextEditor/EnableToolbar">
+<pre>yes</pre>
+</div>
 <div created="20210516184014818" modified="20210516184014818" title="$:/config/TiddlerInfo/Mode">
 <pre>sticky</pre>
+</div>
+<div created="20210522171744663" modified="20210522171755337" title="$:/config/Toolbar/ButtonClass">
+<pre>tc-btn-invisible</pre>
 </div>
 <div author="JeremyRuston" core-version="&gt;=5.0.0" dependents="" description="TiddlyWiki5 core" list="readme" name="Core" plugin-priority="0" plugin-type="plugin" title="$:/core" type="application/json" version="5.1.23">
 <pre>{
@@ -10114,8 +10137,8 @@ Error message and password prompt
 <div created="20210516144415561" modified="20210516144420678" title="$:/language/DefaultNewTiddlerTitle">
 <pre>New Page</pre>
 </div>
-<div created="20210101000000000" id="1621189236" modified="20210101000000000" title="$:/palette" type="text/vnd.tiddlywiki">
-<pre>$:/palettes/SpartanNight</pre>
+<div created="20210101000000000" id="1621189236" modified="20210522172315059" title="$:/palette" type="text/vnd.tiddlywiki">
+<pre>$:/palettes/SpartanDay</pre>
 </div>
 <div created="20210516144239067" modified="20210516171614037" module-type="syncadaptor" plugin-type="syncadaptor" tags="" title="$:/plugins/octalmage/icsyncadapter" type="application/javascript">
 <pre>/*\
@@ -10129,9 +10152,6 @@ Error message and password prompt
     \*/
     
     (function(){
-
-
-    
       /*jslint node: true, browser: true */
       /*global $tw: false */
       &quot;use strict&quot;;
@@ -10186,7 +10206,7 @@ Error message and password prompt
 
               posts = this.fromList(values).map((a) =&gt; {
                 const post = a[1]; // steak sauce
-                return { ...post, id: a[0].key, type: 'text/vnd.tiddlywiki' };
+                return { type: 'text/vnd.tiddlywiki', ...post, id: a[0].key };
               }).map(post =&gt; {
                     const { body, ...rest } = post;
 
@@ -10196,7 +10216,7 @@ Error message and password prompt
               });   
         }
         catch (e) {
-            console.log(e);
+            // NOOP 
         }
         
         console.log(posts);
@@ -10257,8 +10277,12 @@ Error message and password prompt
       Load a tiddler and invoke the callback with (err,tiddlerFields)
       */
       TiddlyICAdaptor.prototype.loadTiddler = function(title,callback) {
-        var self = this;
-        callback(null, this.titleCache[title]);
+        const self = this;
+        if (typeof self.titleCache[title] === 'undefined') {
+            return callback();
+        }
+
+        callback(null, self.titleCache[title]);
       };
       
       /*
@@ -10268,7 +10292,9 @@ Error message and password prompt
       */
       TiddlyICAdaptor.prototype.deleteTiddler = async function(title,callback,options) {
         var self = this;
-
+        if (typeof self.titleCache[title] === 'undefined') {
+            return callback();
+        }
 
         try {
             await window.wiki.delete(this.titleCache[title].id);
@@ -10285,8 +10311,8 @@ Error message and password prompt
       
     })();</pre>
 </div>
-<div created="20210516144203277" modified="20210516180614864" title="$:/SiteSubtitle">
-<pre></pre>
+<div created="20210516144203277" modified="20210516210558615" title="$:/SiteSubtitle">
+<pre>This wiki is cleared every hour.</pre>
 </div>
 <div created="20210516144156471" modified="20210516180613234" title="$:/SiteTitle">
 <pre>Internet Computer Wiki</pre>
@@ -10297,8 +10323,14 @@ Error message and password prompt
 <div created="20210516153119464" modified="20210516153120070" title="$:/state/plugin-info-334910430-$:/core---1812962263">
 <pre>contents</pre>
 </div>
-<div created="20210516182035716" modified="20210516184058547" title="$:/state/tab--1963855381">
-<pre>$:/core/ui/ControlPanel/Toolbars</pre>
+<div created="20210522171614249" modified="20210522171614249" title="$:/state/ShowPaletteEditor">
+<pre>yes</pre>
+</div>
+<div created="20210522171618558" modified="20210522171619292" title="$:/state/sidebar">
+<pre>yes</pre>
+</div>
+<div created="20210516182035716" modified="20210522172246371" title="$:/state/tab--1963855381">
+<pre>$:/core/ui/ControlPanel/Palette</pre>
 </div>
 <div created="20210516184002771" modified="20210516184110398" title="$:/state/tab--2112689675">
 <pre>$:/core/ui/ControlPanel/Advanced</pre>
@@ -10306,14 +10338,14 @@ Error message and password prompt
 <div created="20210516151945168" modified="20210516153114519" title="$:/state/tab--86143343">
 <pre>$:/core/ui/ControlPanel/Plugins/Installed/Plugins</pre>
 </div>
-<div created="20210516144221857" modified="20210516184112690" title="$:/state/tab-1749438307">
-<pre>$:/core/ui/ControlPanel/Settings</pre>
+<div created="20210516144221857" modified="20210522172210534" title="$:/state/tab-1749438307">
+<pre>$:/core/ui/ControlPanel/Appearance</pre>
 </div>
 <div created="20210516144223799" modified="20210516153401776" title="$:/state/tab-2065006209">
 <pre>$:/core/ui/ControlPanel/Saving/General</pre>
 </div>
-<div created="20210516150205689" modified="20210516184101299" title="$:/state/tab/sidebar--595412856">
-<pre>$:/core/ui/SideBar/Tools</pre>
+<div created="20210516150205689" modified="20210522172202911" title="$:/state/tab/sidebar--595412856">
+<pre>$:/core/ui/SideBar/Recent</pre>
 </div>
 <div title="$:/status/IsLoggedIn">
 <pre>no</pre>
@@ -10321,7 +10353,7 @@ Error message and password prompt
 <div title="$:/status/RequireReloadDueToPluginChange">
 <pre>no</pre>
 </div>
-<div created="20210516183844327" list="" modified="20210516184107244" title="$:/StoryList">
+<div created="20210522172204222" list="Home" modified="20210522172209105" title="$:/StoryList">
 <pre></pre>
 </div>
 <div author="JeremyRuston" core-version="&gt;=5.0.0" dependents="$:/themes/tiddlywiki/vanilla" description="Emphasises individual tiddlers" name="Snow White" plugin-priority="0" plugin-type="theme" title="$:/themes/tiddlywiki/snowwhite" type="application/json" version="5.1.23">
@@ -10433,14 +10465,15 @@ Error message and password prompt
     }
 }</pre>
 </div>
+<div created="20210522172216359" modified="20210522172216359" title="$:/themes/tiddlywiki/vanilla/options/sidebarlayout">
+<pre>fluid-fixed</pre>
+</div>
+<div created="20210522172220360" modified="20210522172229239" title="$:/themes/tiddlywiki/vanilla/options/stickytitles">
+<pre>no</pre>
+</div>
 <div created="20210516184053882" modified="20210516184053882" title="$:/view">
 <pre>pop</pre>
 </div>
-<div created="20210101000000000" id="1621189519" modified="20210101000000000" title="Home" type="text/vnd.tiddlywiki">
-<pre>LOADING...</pre>
-</div>
-
-
 </div>
 
 
