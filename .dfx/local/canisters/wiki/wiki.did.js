@@ -23,6 +23,7 @@ export default ({ IDL }) => {
     'read' : IDL.Func([BlogId], [IDL.Opt(Blog)], ['query']),
     'readAll' : IDL.Func([], [Trie], ['query']),
     'update' : IDL.Func([BlogId, Blog], [IDL.Bool], []),
+    'whoami' : IDL.Func([], [IDL.Principal], []),
   });
 };
 export const init = ({ IDL }) => { return []; };

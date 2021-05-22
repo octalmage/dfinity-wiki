@@ -43,4 +43,5 @@ service : {
   read: (BlogId) -> (opt Blog) query;
   readAll: () -> (Trie) query;
   update: (BlogId, Blog) -> (bool);
+  whoami: () -> (principal);
 }

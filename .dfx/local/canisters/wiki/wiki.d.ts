@@ -17,4 +17,5 @@ export default interface _SERVICE {
   'read' : (arg_0: BlogId) => Promise<[] | [Blog]>,
   'readAll' : () => Promise<Trie>,
   'update' : (arg_0: BlogId, arg_1: Blog) => Promise<boolean>,
+  'whoami' : () => Promise<Principal>,
 };

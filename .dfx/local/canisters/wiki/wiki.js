@@ -1,3 +1,3 @@
 import idlImport from './wiki.did.js';
 export const idlFactory = idlImport;
-export const canisterId = "rrkah-fqaaa-aaaaa-aaaaq-cai";
+export const canisterId = "ryjl3-tyaaa-aaaaa-aaaba-cai";
